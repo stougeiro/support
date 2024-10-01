@@ -28,7 +28,7 @@
             return ceil( (float) number_format($size / pow(1024, $power), 2, '.', ',')) .' '. $units[$power];
         }
     
-        public static function filesize(string $file): string
+        public static function size(string $file): string
         {
             if ( ! is_file($file)) {
                 return 0;

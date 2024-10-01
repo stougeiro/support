@@ -5,21 +5,21 @@
 
     final class Str
     {
-        public static function ttrim(string $_string): string
+        public static function ttrim(string $text): string
         {
             return preg_replace([
                 '/\s{2,}/',
                 '/[\t\n]/',
-            ], ' ', trim($_string));
+            ], ' ', trim($text));
         }
 
-        public static function onlyNumbers(string|null $_string): string
+        public static function onlyNumbers(string|null $text): string
         {    
-            return preg_replace('/[^0-9]/', '', $_string);
+            return preg_replace('/[^0-9]/', '', $text);
         }
 
-        public static function empty(string|null $_var): bool
+        public static function empty(string|null $text): bool
         {
-            return is_null($_var) || empty($_var) || (preg_replace('/(\s)/i', '', $_var) === '');
+            return is_null($text) || empty($text) || (preg_replace('/(\s)/i', '', $text) === '');
         }
     }

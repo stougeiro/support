@@ -5,13 +5,13 @@
 
     final class SafeBase64
     {
-        public static function encode(string $_string ): string
+        public static function encode(string $text ): string
         {
-            return strtr( base64_encode($_string), '+/=', ',-_');
+            return strtr( base64_encode($text), '+/=', ',-_');
         }
 
-        public static function decode(string $_string ): string
+        public static function decode(string $text ): string
         {
-            return base64_decode( strtr($_string, ',-_', '+/='));
+            return base64_decode( strtr($text, ',-_', '+/='));
         }
     }

@@ -5,43 +5,43 @@
 
     final class Arr
     {
-        public static function kshift(array &$collection): array|null
+        public static function kshift(array &$array): array|null
         {
-            if ( ! count($collection)) {
+            if (static::empty($array)) {
                 return null;
             }
 
-            $key = array_key_first($collection);
-            $item = array($key => $collection[$key]);
+            $key = array_key_first($array);
+            $item = array($key => $array[$key]);
 
-            unset($collection[$key]);
+            unset($array[$key]);
 
             return $item;
         }
 
-        public static function kpop(array &$collection): array|null
+        public static function kpop(array &$array): array|null
         {
-            if ( ! count($collection)) {
+            if (static::empty($array)) {
                 return null;
             }
 
-            $key = array_key_last($collection);
-            $item = array($key => $collection[$key]);
+            $key = array_key_last($array);
+            $item = array($key => $array[$key]);
 
-            unset($collection[$key]);
+            unset($array[$key]);
 
             return $item;
         }
 
-        public static function grab(string|int $key, array &$collection): mixed
+        public static function grab(string|int $key, array &$array): mixed
         {
-            if ( ! array_key_exists($key, $collection)) {
+            if ( ! array_key_exists($key, $array)) {
                 return null;
             }
 
-            $item = $collection[$key];
+            $item = $array[$key];
 
-            unset($collection[$key]);
+            unset($array[$key]);
 
             return $item;
         }
@@ -76,5 +76,10 @@
             return array_filter($array, function($key) use ($keys) {
                 return in_array($key, $keys);
             }, ARRAY_FILTER_USE_KEY);
+        }
+
+        public static function empty(array $array): bool
+        {
+            return (empty($array) || $array == [] || count($array) == 0);
         }
     }

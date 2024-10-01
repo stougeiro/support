@@ -5,14 +5,14 @@
 
     final class Dir
     {
-        public static function rrmdir(string $_dir): bool
+        public static function rrmdir(string $dir): bool
         {
-            $items = array_diff(scandir($_dir), ['.','..']);
+            $items = array_diff(scandir($dir), ['.','..']);
 
             foreach ($items as $item) {
-                (is_dir($_dir .DIRECTORY_SEPARATOR. $item)) ? static::rrmdir($_dir .DIRECTORY_SEPARATOR. $item) : unlink($_dir .DIRECTORY_SEPARATOR. $item);
+                (is_dir($dir .DIRECTORY_SEPARATOR. $item)) ? static::rrmdir($dir .DIRECTORY_SEPARATOR. $item) : unlink($dir .DIRECTORY_SEPARATOR. $item);
             }
 
-            return rmdir($_dir);
+            return rmdir($dir);
         }
     }
