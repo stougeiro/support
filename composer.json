@@ -11,7 +11,10 @@
     "autoload": {
         "psr-4": {
             "STDW\\Support\\": "src/"
-        }
+        },
+        "files": [
+            "src/aliases.php"
+        ]
     },
     "minimum-stability": "dev",
     "require": {
