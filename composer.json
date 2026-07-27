@@ -1,6 +1,9 @@
 {
     "name": "stougeiro/support",
+    "description": "A small helper library providing generic support utilities for PHP applications.",
     "type": "package",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "license": "MIT",
     "authors": [
         {
@@ -8,6 +11,22 @@
             "email": "sidneytougeiro@gmail.com"
         }
     ],
+    "keywords": [
+        "support",
+        "helpers",
+        "utilities",
+        "functions",
+        "php-helpers",
+        "php-utilities",
+        "toolkit",
+        "assist",
+        "helper-functions",
+        "support-library"
+    ],
+    "support": {
+        "issues": "https://github.com/stougeiro/support/issues",
+        "source": "https://github.com/stougeiro/support"
+    },
     "autoload": {
         "psr-4": {
             "STDW\\Support\\": "src/"
@@ -16,8 +35,7 @@
             "src/aliases.php"
         ]
     },
-    "minimum-stability": "dev",
     "require": {
-        "php": "^8.1"
+        "php": ">=8.1"
     }
 }
