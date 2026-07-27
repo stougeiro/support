@@ -3,6 +3,13 @@
     namespace STDW\Support;
 
 
+    /**
+     * Time To Live helper.
+     *
+     * Provides simple integer-based TTL calculations.
+     * Returns a TTL value in seconds.
+     * Negative values are normalized to zero.
+     */
     final class TTL
     {
         private const NONE = 0;
@@ -23,37 +30,37 @@
 
         public static function seconds(int $seconds = 1): int
         {
-            return (self::SECOND * $seconds);
+            return max(0, self::SECOND * $seconds);
         }
 
         public static function minutes(int $minutes = 1): int
         {
-            return (self::MINUTE * $minutes);
+            return max(0, self::MINUTE * $minutes);
         }
 
         public static function hours(int $hours = 1): int
         {
-            return (self::HOUR * $hours);
+            return max(0, self::HOUR * $hours);
         }
 
         public static function days(int $days = 1): int
         {
-            return (self::DAY * $days);
+            return max(0, self::DAY * $days);
         }
 
         public static function weeks(int $weeks = 1): int
         {
-            return (self::WEEK * $weeks);
+            return max(0, self::WEEK * $weeks);
         }
 
         public static function months(int $months = 1): int
         {
-            return (self::MONTH * $months);
+            return max(0, self::MONTH * $months);
         }
 
         public static function years(int $years = 1): int
         {
-            return (self::YEAR * $years);
+            return max(0, self::YEAR * $years);
         }
 
         public static function forever(): int
