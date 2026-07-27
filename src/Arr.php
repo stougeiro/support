@@ -5,6 +5,11 @@
 
     final class Arr
     {
+        public static function empty(array $array): bool
+        {
+            return $array === [];
+        }
+
         public static function kshift(array &$array): array|null
         {
             if (static::empty($array)) {
@@ -52,34 +57,56 @@
                 return [];
             }
 
-            return is_string($item) ? [$item] : $item;
+            return is_array($item) ? $item : [$item];
         }
 
         public static function keysExists(array $keys, array $array): bool
         {
-            return count( array_diff_key( array_flip($keys), $array)) == 0;
-        }
-
-        public static function fromString(string $text): array
-        {
-            $array = [];
-
-            for($i=0; $i<strlen($text); $i++) {
-                $array[] = $text[$i];
+            foreach ($keys as $key) {
+                if ( ! array_key_exists($key, $array)) {
+                    return false;
+                }
             }
 
-            return $array;
+            return true;
         }
 
         public static function only(array $array, array $keys): array
         {
-            return array_filter($array, function($key) use ($keys) {
-                return in_array($key, $keys);
-            }, ARRAY_FILTER_USE_KEY);
+            $keys = array_flip($keys);
+            $result = [];
+
+            foreach ($array as $key => $value) {
+                if (isset($keys[$key])) {
+                    $result[$key] = $value;
+                }
+            }
+
+            return $result;
         }
 
-        public static function empty(array $array): bool
+        public static function except(array $array, array $keys): array
         {
-            return (empty($array) || $array == [] || count($array) == 0);
+            $keys = array_flip($keys);
+            $result = [];
+
+            foreach ($array as $key => $value) {
+                if ( ! isset($keys[$key])) {
+                    $result[$key] = $value;
+                }
+            }
+
+            return $result;
+        }
+
+        public static function flatten(array $array): array
+        {
+            $result = [];
+
+            array_walk_recursive($array, function($value) use (&$result) {
+                $result[] = $value;
+            });
+
+            return $result;
         }
     }
