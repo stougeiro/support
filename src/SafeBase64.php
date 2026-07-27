@@ -12,6 +12,6 @@
 
         public static function decode(string $text ): string
         {
-            return base64_decode( strtr($text, ',-_', '+/='));
+            return base64_decode( strtr($text, ',-_', '+/='), true);
         }
     }
