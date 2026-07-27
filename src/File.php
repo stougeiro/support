@@ -10,7 +10,10 @@
             $files = glob($pattern, $flags);
     
             foreach (glob( dirname($pattern) .DIRECTORY_SEPARATOR. '*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
-                $files = array_merge($files, static::rglob($dir .DIRECTORY_SEPARATOR. basename($pattern), $flags));
+                $files = array_merge(
+                    $files,
+                    static::rglob($dir .DIRECTORY_SEPARATOR. basename($pattern), $flags)
+                );
             }
     
             return $files;
@@ -18,20 +21,18 @@
 
         public static function unit(int $size): string
         {
-            if ( ! is_int($size)) {
-                return 0;
-            }
+            $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            $size = max(0, $size);
+            $power = $size > 0 ? min(floor(log($size, 1024)), count($units) - 1) : 0;
+            $value = $size / (1024 ** $power);
 
-            $units = ['B', 'KB', 'MB', 'GB'];
-            $power = $size > 0 ? floor(log($size, 1024)) : 0;
-
-            return ceil( (float) number_format($size / pow(1024, $power), 2, '.', ',')) .' '. $units[$power];
+            return sprintf('%.2f %s', $value, $units[$power]);
         }
     
         public static function size(string $file): string
         {
             if ( ! is_file($file)) {
-                return 0;
+                return '0 B';
             }
 
             return static::unit( filesize($file));
