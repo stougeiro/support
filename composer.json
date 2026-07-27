@@ -30,10 +30,7 @@
     "autoload": {
         "psr-4": {
             "STDW\\Support\\": "src/"
-        },
-        "files": [
-            "src/aliases.php"
-        ]
+        }
     },
     "require": {
         "php": ">=8.1"
