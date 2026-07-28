@@ -11,7 +11,7 @@
         public static function ulif(): string
         {
             if (PHP_INT_SIZE < 8) {
-                throw new RuntimeException("Tokens::ulid: PHP 64-bit is required");
+                throw new RuntimeException("Tokens::ulif: PHP 64-bit is required");
             }
 
             $ts = (int) floor(microtime(true) * 1000) & 0xFFFFFFFFFFFF;
