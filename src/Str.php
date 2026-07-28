@@ -5,23 +5,49 @@
     use ArgumentCountError;
 
 
+    /**
+     * String helper.
+     *
+     * Provides lightweight utilities for inspecting, transforming, and normalizing
+     * string values. Focuses on safe manipulation, encoding‑aware operations, and
+     * consistent behavior across different environments. All methods are static and
+     * intended for low‑level string handling support.
+     */
     final class Str
     {
+        /**
+         * @param string|null $text 
+         * @return bool 
+         */
         public static function empty(?string $text): bool
         {
             return trim($text ?? '') === '';
         }
 
+        /**
+         * @param string $text 
+         * @return string 
+         */
         public static function ttrim(string $text): string
         {
-            return preg_replace('/\s+/', ' ', trim($text));
+            return (string) preg_replace('/\s+/', ' ', trim($text));
         }
 
+        /**
+         * @param string|null $text 
+         * @return string 
+         */
         public static function onlyNumbers(?string $text): string
         {    
-            return preg_replace('/\D+/', '', $text ?? '');
+            return (string) preg_replace('/\D+/', '', $text ?? '');
         }
 
+        /**
+         * @param string $mask 
+         * @param string $value 
+         * @param string $char 
+         * @return string|null 
+         */
         public static function mask(string $mask, string $value, string $char = '#'): ?string
         {
             $template = str_replace($char, '%s', $mask);
@@ -33,19 +59,27 @@
             }
         }
 
+        /**
+         * @param string $text 
+         * @return string 
+         */
         public static function slugify(string $text): string
         {
             // Remove acentos e translitera
-            $text = iconv('UTF-8', 'ASCII//TRANSLIT', $text);
+            $text = (string) iconv('UTF-8', 'ASCII//TRANSLIT', $text);
             // Substitui qualquer grupo de não-letras/dígitos por hífen
-            $text = preg_replace('/[^a-zA-Z0-9]+/', '-', $text);
+            $text = (string) preg_replace('/[^a-zA-Z0-9]+/', '-', $text);
             // Remove hífens duplicados e bordas
             $text = trim($text, '-');
-            $text = preg_replace('/-+/', '-', $text);
+            $text = (string) preg_replace('/-+/', '-', $text);
 
             return strtolower($text ?: '');
         }
 
+        /**
+         * @param string $classname 
+         * @return bool 
+         */
         public static function isFqcn(string $classname): bool
         {
             if (self::empty($classname)) {

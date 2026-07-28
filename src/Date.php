@@ -3,8 +3,19 @@
     namespace STDW\Support;
 
 
+    /**
+     * Date helper.
+     *
+     * Provides lightweight utilities for validating and normalizing date strings.
+     * Focuses on strict, format‑aware checks to ensure safe date handling.
+     * All methods are static and intended for low‑level support operations.
+     */
     final class Date
     {
+        /**
+         * @param string $date 
+         * @return bool 
+         */
         public static function isValidDate(string $date): bool
         {
             $date = trim($date);
@@ -22,6 +33,10 @@
             return checkdate((int) $matches[2], (int) $matches[3], (int) $matches[1]);
         }
 
+        /**
+         * @param string $time 
+         * @return bool 
+         */
         public static function isValidTime(string $time): bool
         {
             $time = trim($time);
@@ -33,6 +48,10 @@
             return preg_match('/^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])(:(?:[0-5][0-9]))?$/', $time) === 1;
         }
 
+        /**
+         * @param string $datetime 
+         * @return bool 
+         */
         public static function isValidDateTime(string $datetime): bool
         {
             $datetime = trim($datetime);
@@ -50,6 +69,12 @@
             return checkdate((int) $matches[2], (int) $matches[3], (int) $matches[1]);
         }
 
+        /**
+         * @param string $date 
+         * @param string $from 
+         * @param string $to 
+         * @return null|string 
+         */
         public static function convert(string $date, string $from = 'Y-m-d', string $to = 'd/m/Y'): ?string
         {
             $d = date_create_from_format($from, $date);

@@ -6,8 +6,22 @@
     use InvalidArgumentException;
 
 
+    /**
+     * Token generation helper.
+     *
+     * Provides lightweight utilities for producing unique, non‑colliding identifiers.
+     * Includes ultra‑light string tokens and Snowflake‑style numeric IDs with optional
+     * node differentiation. All methods are static and intended for low‑level identity
+     * and correlation support.
+     */
     final class Tokens
     {
+        /**
+         * Generates a ULIF (Universally Unique Lexicographically Sortable Identifier).
+         *
+         * @return string The generated ULIF.
+         * @throws RuntimeException If the PHP version is not 64-bit.
+         */
         public static function ulif(): string
         {
             if (PHP_INT_SIZE < 8) {
@@ -30,12 +44,21 @@
             $out = '';
 
             for ($i = 0; $i < 26; $i++) {
-                $out .= $alphabet[bindec(substr($bits, $i * 5, 5))];
+                $index = (int) bindec(substr($bits, $i * 5, 5));
+                $out .= $alphabet[$index];
             }
 
             return $out;
         }
 
+        /**
+         * Generates a Snowflake ID.
+         *
+         * @param int $node The node ID (0-1023).
+         * @return int The generated Snowflake ID.
+         * @throws RuntimeException If the PHP version is not 64-bit.
+         * @throws InvalidArgumentException If the node ID is out of range.
+         */
         public static function snowfake(int $node = 0): int
         {
             if (PHP_INT_SIZE < 8) {
