@@ -8,19 +8,19 @@ Each helper focuses on a single responsibility, offering safe and consistent ope
 
 ## ✨ Features
 
-- **Minimalistic helpers**:
+- **Minimalistic helpers**  
   Small, focused classes that solve common problems without adding complexity.
 
-- **Strong typing**
+- **Strong typing**  
   Fully compatible with PHPStan Level 9, ensuring maximum static‑analysis integrity.
 
-- **Consistent API**
+- **Consistent API**  
   Static methods, clear naming, predictable behavior.
 
-- **No dependencies**
+- **No dependencies**  
   Pure PHP utilities — fast, portable, and framework‑agnostic.
 
-- **Safety‑oriented**
+- **Safety‑oriented**  
   Careful handling of strings, paths, files, tokens, and sensitive values.
 
 ---
