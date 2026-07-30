@@ -27,6 +27,12 @@
         "issues": "https://github.com/stougeiro/support/issues",
         "source": "https://github.com/stougeiro/support"
     },
+    "funding": [
+        {
+            "type": "buymeacoffee",
+            "url": "https://www.buymeacoffee.com/seuusuario"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "STDW\\Support\\": "src/"
