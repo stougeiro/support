@@ -48,6 +48,13 @@ Modern applications often need small, reliable helpers — but frameworks tend t
 
 It’s a foundation you can trust, especially when building systems that value clarity, correctness, and long‑term maintainability.
 
+---
+
+## 🤝 Contributions
+
+Contributions are welcome.
+Feel free to open issues or submit pull requests.
+
 <br><br>
 
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="170"/>](https://www.buymeacoffee.com/stougeiro)
