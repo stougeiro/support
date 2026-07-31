@@ -1,7 +1,7 @@
 {
     "name": "stougeiro/support",
     "description": "A small helper library providing generic support utilities for PHP applications.",
-    "type": "package",
+    "type": "library",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "license": "MIT",
@@ -30,7 +30,7 @@
     "funding": [
         {
             "type": "buymeacoffee",
-            "url": "https://www.buymeacoffee.com/seuusuario"
+            "url": "https://www.buymeacoffee.com/stougeiro"
         }
     ],
     "autoload": {
