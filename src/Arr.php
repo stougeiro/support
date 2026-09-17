@@ -120,9 +120,9 @@
         /**
          * Checks whether all given keys exist in the array.
          *
-         * Uses array_diff_key() (C-level) to remove the desired keys.
-         * If the result is empty, all keys existed.
-         * Complexity: O(n + k) where n = array size, k = number of keys.
+         * Iterates over the requested keys and verifies each exists.
+         * Short-circuit: stops at the first missing key.
+         * Complexity: O(k) where k = number of keys to check.
          *
          * @param array<int|string> $keys
          * @param array<mixed> $array
@@ -130,7 +130,13 @@
          */
         public static function keysExists(array $keys, array $array): bool
         {
-            return array_diff_key($array, array_flip($keys)) === [];
+            foreach ($keys as $key) {
+                if ( ! array_key_exists($key, $array)) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /**
@@ -167,8 +173,8 @@
          * Flattens an array into a single dimension.
          *
          * Preserves only leaf values (non-arrays). Keys are discarded.
-         * Iterative implementation with explicit stack — no recursion,
-         * no stack overflow risk regardless of nesting depth.
+         * Recursive helper ensures correct left-to-right order.
+         * Stack depth equals max nesting depth, not total elements.
          * O(n) where n = total leaf values.
          *
          * @param array<mixed> $array
@@ -177,31 +183,11 @@
         public static function flatten(array $array): array
         {
             $result = [];
-            $stack = [$array];
 
-            while ($stack !== []) {
-                $current = array_pop($stack);
-
-                foreach ($current as $value) {
-                    if (is_array($value)) {
-                        $stack[] = $value;
-                    } else {
-                        $result[] = $value;
-                    }
-                }
-            }
+            self::flattenWalk($array, $result);
 
             return $result;
         }
-
-
-        // ---------------------------------------------------------------
-        // Polyfills — PHP 8.4
-        //
-        // Equivalent implementations of PHP 8.4 native functions.
-        // Short-circuit: stops at the first deterministic result.
-        // Callback receives ($value, $key) — same signature as PHP 8.4.
-        // ---------------------------------------------------------------
 
         /**
          * Polyfill for PHP 8.4's array_any().
@@ -290,15 +276,6 @@
             return null;
         }
 
-
-        // ---------------------------------------------------------------
-        // Polyfills — PHP 8.5
-        //
-        // Equivalent implementations of PHP 8.5 native functions.
-        // No callback — strictly follows the PHP spec.
-        // Uses array_key_first/last (PHP 7.3+) for O(1).
-        // ---------------------------------------------------------------
-
         /**
          * Polyfill for PHP 8.5's array_first().
          *
@@ -328,11 +305,6 @@
         {
             return $array === [] ? null : $array[array_key_last($array)];
         }
-
-
-        // ---------------------------------------------------------------
-        // Custom helpers
-        // ---------------------------------------------------------------
 
         /**
          * Flattens a nested array into dot notation.
@@ -442,6 +414,7 @@
         }
 
 
+
         /**
          * Iterative helper for undot(). Inserts a value into a nested
          * array using a reference chain to traverse the keys.
@@ -470,5 +443,21 @@
             $current[$keys[$max]] = $value;
 
             return $array;
+        }
+
+        /**
+         * @param array<mixed> $array
+         * @param array<mixed> $result
+         * @return void
+         */
+        private static function flattenWalk(array $array, array &$result): void
+        {
+            foreach ($array as $value) {
+                if (is_array($value)) {
+                    self::flattenWalk($value, $result);
+                } else {
+                    $result[] = $value;
+                }
+            }
         }
     }
