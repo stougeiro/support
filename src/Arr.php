@@ -388,36 +388,6 @@
         }
 
         /**
-         * Iterative helper for undot(). Inserts a value into a nested
-         * array using a reference chain to traverse the keys.
-         * No recursion, no stack overflow risk.
-         *
-         * @param array<mixed> $array
-         * @param list<string> $keys
-         * @param int $index
-         * @param mixed $value
-         * @return array<mixed>
-         */
-        private static function undotSet(array $array, array $keys, int $index, mixed $value): array
-        {
-            $current = &$array;
-
-            for ($i = $index, $max = count($keys) - 1; $i < $max; $i++) {
-                $key = $keys[$i];
-
-                if ( ! isset($current[$key]) || ! is_array($current[$key])) {
-                    $current[$key] = [];
-                }
-
-                $current = &$current[$key];
-            }
-
-            $current[$keys[$max]] = $value;
-
-            return $array;
-        }
-
-        /**
          * Returns N random key => value pairs from the array.
          *
          * Works with both lists (indexed) and dictionaries (associative).
@@ -469,5 +439,36 @@
             }
 
             return $result;
+        }
+
+
+        /**
+         * Iterative helper for undot(). Inserts a value into a nested
+         * array using a reference chain to traverse the keys.
+         * No recursion, no stack overflow risk.
+         *
+         * @param array<mixed> $array
+         * @param list<string> $keys
+         * @param int $index
+         * @param mixed $value
+         * @return array<mixed>
+         */
+        private static function undotSet(array $array, array $keys, int $index, mixed $value): array
+        {
+            $current = &$array;
+
+            for ($i = $index, $max = count($keys) - 1; $i < $max; $i++) {
+                $key = $keys[$i];
+
+                if ( ! isset($current[$key]) || ! is_array($current[$key])) {
+                    $current[$key] = [];
+                }
+
+                $current = &$current[$key];
+            }
+
+            $current[$keys[$max]] = $value;
+
+            return $array;
         }
     }
