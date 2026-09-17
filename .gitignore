@@ -9,6 +9,9 @@ composer.lock
 .cache/
 composer-cache/
 
+# PHPUnit/Pest
+.phpunit.cache/
+
 # Logs
 *.log
 
