@@ -164,11 +164,12 @@
         }
 
         /**
-         * Recursively flattens an array into a single dimension.
+         * Flattens an array into a single dimension.
          *
          * Preserves only leaf values (non-arrays). Keys are discarded.
-         * Recursive implementation — for very deeply nested arrays, may
-         * reach PHP's stack limit.
+         * Iterative implementation with explicit stack — no recursion,
+         * no stack overflow risk regardless of nesting depth.
+         * O(n) where n = total leaf values.
          *
          * @param array<mixed> $array
          * @return array<mixed>
@@ -176,14 +177,17 @@
         public static function flatten(array $array): array
         {
             $result = [];
+            $stack = [$array];
 
-            foreach ($array as $value) {
-                if (is_array($value)) {
-                    foreach (self::flatten($value) as $v) {
-                        $result[] = $v;
+            while ($stack !== []) {
+                $current = array_pop($stack);
+
+                foreach ($current as $value) {
+                    if (is_array($value)) {
+                        $stack[] = $value;
+                    } else {
+                        $result[] = $value;
                     }
-                } else {
-                    $result[] = $value;
                 }
             }
 
@@ -384,8 +388,9 @@
         }
 
         /**
-         * Recursive helper for undot(). Inserts a value into a nested
-         * array using a numeric index to traverse the keys.
+         * Iterative helper for undot(). Inserts a value into a nested
+         * array using a reference chain to traverse the keys.
+         * No recursion, no stack overflow risk.
          *
          * @param array<mixed> $array
          * @param list<string> $keys
@@ -395,19 +400,19 @@
          */
         private static function undotSet(array $array, array $keys, int $index, mixed $value): array
         {
-            $key = $keys[$index];
+            $current = &$array;
 
-            if ($index === count($keys) - 1) {
-                $array[$key] = $value;
+            for ($i = $index, $max = count($keys) - 1; $i < $max; $i++) {
+                $key = $keys[$i];
 
-                return $array;
+                if ( ! isset($current[$key]) || ! is_array($current[$key])) {
+                    $current[$key] = [];
+                }
+
+                $current = &$current[$key];
             }
 
-            if ( ! isset($array[$key]) || ! is_array($array[$key])) {
-                $array[$key] = [];
-            }
-
-            $array[$key] = self::undotSet($array[$key], $keys, $index + 1, $value);
+            $current[$keys[$max]] = $value;
 
             return $array;
         }
@@ -437,12 +442,9 @@
             $total = count($keys);
 
             if ($count >= $total) {
-                /** Partial Fisher-Yates: shuffle in-place, O($total)
+                /** Full shuffle: native shuffle() is C-level, faster than manual Fisher-Yates
                  */
-                for ($i = $total - 1; $i > 0; $i--) {
-                    $j = random_int(0, $i);
-                    [$keys[$i], $keys[$j]] = [$keys[$j], $keys[$i]];
-                }
+                shuffle($keys);
 
                 $result = [];
 
