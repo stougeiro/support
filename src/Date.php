@@ -275,6 +275,10 @@
         {
             $tz = $timezone ?? self::$defaultTimezone ?? date_default_timezone_get();
 
+            if ($timezone !== null && ! in_array($tz, DateTimeZone::listIdentifiers(), true)) {
+                throw new InvalidArgumentException("Invalid timezone: {$tz}");
+            }
+
             return new DateTimeZone($tz);
         }
 

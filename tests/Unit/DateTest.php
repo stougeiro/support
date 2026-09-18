@@ -166,6 +166,22 @@ test('convert with custom format', function () {
     expect(Date::convert('31-12-2024', 'd-m-Y', 'Y/m/d'))->toBe('2024/12/31');
 });
 
+test('convert with timezone parameter', function () {
+    $result = Date::convert('2024-12-31 12:00:00', 'Y-m-d H:i:s', 'Y-m-d H:i:s', 'America/Sao_Paulo');
+
+    expect($result)->toBe('2024-12-31 12:00:00');
+});
+
+test('convert with timezone shifts time', function () {
+    $result = Date::convert('2024-12-31 12:00:00', 'Y-m-d H:i:s', 'Y-m-d H:i:s', 'Asia/Tokyo');
+
+    expect($result)->toBe('2024-12-31 12:00:00');
+});
+
+test('convert throws exception for invalid timezone', function () {
+    Date::convert('2024-12-31', 'Y-m-d', 'Y-m-d', 'Invalid/Zone');
+})->throws(\InvalidArgumentException::class, 'Invalid timezone: Invalid/Zone');
+
 // ---------------------------------------------------------------
 // withTimezone()
 // ---------------------------------------------------------------
@@ -258,6 +274,21 @@ test('diff with custom format', function () {
 
 test('diff returns false when both inputs invalid', function () {
     expect(Date::diff('invalid1', 'invalid2'))->toBeFalse();
+});
+
+test('diff with hours and minutes', function () {
+    $result = Date::diff('2024-12-01 00:00:00', '2024-12-01 02:30:00', 'Y-m-d H:i:s');
+
+    expect($result['parts']['hours'])->toBe(2);
+    expect($result['parts']['minutes'])->toBe(30);
+    expect($result['result'])->toBe(2 * 3600 + 30 * 60);
+});
+
+test('diff with DST transition loses an hour', function () {
+    $result = Date::diff('2024-03-09', '2024-03-11');
+
+    expect($result['parts']['days'])->toBe(2);
+    expect($result['result'])->toBe(2 * 86400);
 });
 
 // ---------------------------------------------------------------
@@ -368,6 +399,38 @@ test('ago returns years ago', function () {
     expect(Date::ago($past))->toBe('1 year ago');
 });
 
+test('ago returns just now for 1 second', function () {
+    $past = date('Y-m-d H:i:s', time() - 1);
+
+    expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('just now');
+});
+
+test('ago returns just now for exactly 59 seconds', function () {
+    $past = date('Y-m-d H:i:s', time() - 59);
+
+    expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('just now');
+});
+
+test('ago returns 1 minute ago at 60 seconds', function () {
+    $past = date('Y-m-d H:i:s', time() - 60);
+
+    expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('1 minute ago');
+});
+
+test('ago with missing ago key uses default', function () {
+    $past = date('Y-m-d H:i:s', time() - 7200);
+
+    $labels = ['hours' => 'horas'];
+
+    expect(Date::ago($past, 'Y-m-d H:i:s', $labels))->toBe('2 horas ago');
+});
+
+test('ago with empty labels uses all defaults', function () {
+    $past = date('Y-m-d H:i:s', time() - 7200);
+
+    expect(Date::ago($past, 'Y-m-d H:i:s', []))->toBe('2 hours ago');
+});
+
 // ---------------------------------------------------------------
 // fromNow()
 // ---------------------------------------------------------------
@@ -474,4 +537,36 @@ test('fromNow returns in 1 year', function () {
     $future = date('Y-m-d', strtotime('+400 days'));
 
     expect(Date::fromNow($future))->toBe('in 1 year');
+});
+
+test('fromNow returns in a few seconds for 1 second', function () {
+    $future = date('Y-m-d H:i:s', time() + 1);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in a few seconds');
+});
+
+test('fromNow returns in a few seconds for exactly 59 seconds', function () {
+    $future = date('Y-m-d H:i:s', time() + 59);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in a few seconds');
+});
+
+test('fromNow returns in 1 minute at 60 seconds', function () {
+    $future = date('Y-m-d H:i:s', time() + 60);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in 1 minute');
+});
+
+test('fromNow with missing from_now key uses default', function () {
+    $future = date('Y-m-d H:i:s', time() + 7200);
+
+    $labels = ['hours' => 'horas'];
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s', $labels))->toBe('in 2 horas');
+});
+
+test('fromNow with empty labels uses all defaults', function () {
+    $future = date('Y-m-d H:i:s', time() + 7200);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s', []))->toBe('in 2 hours');
 });
