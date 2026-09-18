@@ -268,3 +268,107 @@ test('bench random full shuffle', function () {
 
     expect($us)->toBeFloat();
 });
+
+// ---------------------------------------------------------------
+// wrap()
+// ---------------------------------------------------------------
+
+test('bench wrap string', function () {
+    $us = bench(fn() => Arr::wrap('hello'), 10_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench wrap array', function () {
+    $arr = [1, 2, 3];
+
+    $us = bench(fn() => Arr::wrap($arr), 10_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// keysExists()
+// ---------------------------------------------------------------
+
+test('bench keysExists 10 keys', function () {
+    $arr = generateArray(1_000);
+    $keys = range(0, 9);
+
+    $us = bench(fn() => Arr::keysExists($keys, $arr), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench keysExists 100 keys', function () {
+    $arr = generateArray(1_000);
+    $keys = range(0, 99);
+
+    $us = bench(fn() => Arr::keysExists($keys, $arr), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// only()
+// ---------------------------------------------------------------
+
+test('bench only 10 keys from 10k', function () {
+    $arr = generateArray(10_000);
+    $keys = range(0, 9);
+
+    $us = bench(fn() => Arr::only($arr, $keys), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench only 100 keys from 10k', function () {
+    $arr = generateArray(10_000);
+    $keys = range(0, 99);
+
+    $us = bench(fn() => Arr::only($arr, $keys), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// except()
+// ---------------------------------------------------------------
+
+test('bench except 10 keys from 10k', function () {
+    $arr = generateArray(10_000);
+    $keys = range(0, 9);
+
+    $us = bench(fn() => Arr::except($arr, $keys), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench except 100 keys from 10k', function () {
+    $arr = generateArray(10_000);
+    $keys = range(0, 99);
+
+    $us = bench(fn() => Arr::except($arr, $keys), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// first() / last()
+// ---------------------------------------------------------------
+
+test('bench first 10k', function () {
+    $arr = generateArray(10_000);
+
+    $us = bench(fn() => Arr::first($arr), 10_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench last 10k', function () {
+    $arr = generateArray(10_000);
+
+    $us = bench(fn() => Arr::last($arr), 10_000);
+
+    expect($us)->toBeFloat();
+});
