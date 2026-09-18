@@ -89,3 +89,47 @@ function bench_validate(): void
         Password::validate('MyP4ss!', $rules);
     }
 }
+
+// ---------------------------------------------------------------
+// needsRehash()
+// ---------------------------------------------------------------
+
+function bench_needsRehash(): void
+{
+    $hash = Password::hash('benchmark_password', PASSWORD_BCRYPT, 12);
+
+    for ($i = 0; $i < 1000; $i++) {
+        Password::needsRehash($hash, PASSWORD_BCRYPT, 12);
+    }
+}
+
+// ---------------------------------------------------------------
+// algo()
+// ---------------------------------------------------------------
+
+function bench_algo(): void
+{
+    $hash = Password::hash('benchmark_password', PASSWORD_BCRYPT, 4);
+
+    for ($i = 0; $i < 1000; $i++) {
+        Password::algo($hash);
+    }
+}
+
+// ---------------------------------------------------------------
+// strengthLabel()
+// ---------------------------------------------------------------
+
+function bench_strengthLabel(): void
+{
+    for ($i = 0; $i < 1000; $i++) {
+        Password::strengthLabel(3);
+        Password::strengthLabel(3, [
+            0 => 'Muito Fraco',
+            1 => 'Fraco',
+            2 => 'Suficiente',
+            3 => 'Forte',
+            4 => 'Muito Forte',
+        ]);
+    }
+}

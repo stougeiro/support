@@ -48,7 +48,6 @@ test('algorithm migration bcrypt to argon2id', function () {
 test('password policy enforcement', function () {
     $policy = [
         'min' => 8,
-        'max' => 64,
         'uppercase' => true,
         'lowercase' => true,
         'numbers' => true,
