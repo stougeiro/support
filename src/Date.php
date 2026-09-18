@@ -274,7 +274,7 @@
          * @param DateInterval $interval
          * @return list<string>
          */
-        private static function intervalParts(\DateInterval $interval): array
+        private static function intervalParts(DateInterval $interval): array
         {
             $parts = [];
 
