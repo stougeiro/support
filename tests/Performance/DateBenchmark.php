@@ -116,6 +116,27 @@ test('bench ago past date', function () {
     expect($us)->toBeFloat();
 });
 
+test('bench ago with custom labels', function () {
+    $past = date('Y-m-d H:i:s', time() - 7200);
+    $labels = ['hours' => 'horas', 'ago' => 'atrás'];
+
+    $us = bench(fn() => Date::ago($past, 'Y-m-d H:i:s', $labels), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// fromNow()
+// ---------------------------------------------------------------
+
+test('bench fromNow future date', function () {
+    $future = date('Y-m-d', strtotime('+30 days'));
+
+    $us = bench(fn() => Date::fromNow($future), 1_000);
+
+    expect($us)->toBeFloat();
+});
+
 // ---------------------------------------------------------------
 // withTimezone()
 // ---------------------------------------------------------------

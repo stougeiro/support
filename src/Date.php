@@ -3,7 +3,6 @@
     namespace STDW\Support;
 
     use DateTime;
-    use DateInterval;
     use DateTimeZone;
     use InvalidArgumentException;
 
@@ -116,95 +115,49 @@
         }
 
         /**
-         * Returns a human-readable difference between two dates.
+         * Returns the difference between two dates as int values.
          *
-         * Calculates the interval and builds a string like "2 days, 3 hours".
-         * Uses resolved timezone (withTimezone > server default).
-         * Returns empty string on invalid input. Complexity: O(1).
+         * Returns result (total seconds) and parts (years, months, days,
+         * hours, minutes, seconds). Both values are always non-negative.
+         * Returns zeros on invalid input.
+         * Complexity: O(1).
          *
          * @param string $date1
          * @param string $date2
          * @param string $format
-         * @return string
+         * @return false|array{
+         *   result: int,
+         *   parts: array{
+         *     years: int,
+         *     months: int,
+         *     days: int,
+         *     hours: int,
+         *     minutes: int,
+         *     seconds: int
+         * }}
          */
-        public static function diff(string $date1, string $date2, string $format = 'Y-m-d'): string
+        public static function diff(string $date1, string $date2, string $format = 'Y-m-d'): false|array
         {
             $d1 = date_create_from_format($format, $date1, self::resolveTimezone(null));
             $d2 = date_create_from_format($format, $date2, self::resolveTimezone(null));
 
             if ($d1 === false || $d2 === false) {
-                return '';
+                return false;
             }
 
             $interval = $d1->diff($d2);
 
-            return self::formatInterval($interval);
-        }
-
-        /**
-         * Returns a human-readable relative time string.
-         *
-         * For past dates: "2 hours ago", "3 days ago", "just now".
-         * For future dates: "2 hours from now", "3 days from now".
-         * Uses resolved timezone (withTimezone > server default).
-         * Returns empty string on invalid input. Complexity: O(1).
-         *
-         * @param string $date
-         * @param string $format
-         * @return string
-         */
-        public static function ago(string $date, string $format = 'Y-m-d'): string
-        {
-            $parsed = date_create_from_format($format, $date, self::resolveTimezone(null));
-
-            if ($parsed === false) {
-                return '';
-            }
-
-            $now = new DateTime('now', self::resolveTimezone(null));
-            $interval = $now->diff($parsed);
-
-            if ($interval->invert === 0) {
-                // Future date
-                $parts = self::intervalParts($interval);
-
-                return ($parts === [] ? '0 seconds' : implode(', ', $parts)) . ' from now';
-            }
-
-            // Past date
-            $diff = time() - $parsed->getTimestamp();
-
-            if ($diff < 60) {
-                return 'just now';
-            }
-
-            if ($diff < 3600) {
-                $minutes = (int) floor($diff / 60);
-
-                return $minutes . ' minute' . ($minutes > 1 ? 's' : '') . ' ago';
-            }
-
-            if ($diff < 86400) {
-                $hours = (int) floor($diff / 3600);
-
-                return $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
-            }
-
-            if ($diff < 2592000) {
-                $days = (int) floor($diff / 86400);
-
-                return $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
-            }
-
-            if ($diff < 31536000) {
-                $months = (int) floor($diff / 2592000);
-
-                return $months . ' month' . ($months > 1 ? 's' : '') . ' ago';
-            }
-
-            $years = (int) floor($diff / 31536000);
-
-            return $years . ' year' . ($years > 1 ? 's' : '') . ' ago';
+            return [
+                'result' => ($interval->days * 86400) + ($interval->h * 3600) + ($interval->i * 60) + $interval->s,
+                'parts' => [
+                    'years' => $interval->y,
+                    'months' => $interval->m,
+                    'days' => $interval->d,
+                    'hours' => $interval->h,
+                    'minutes' => $interval->i,
+                    'seconds' => $interval->s,
+                ],
+            ];
         }
 
         /**
@@ -240,6 +193,76 @@
             return $result;
         }
 
+        /**
+         * Returns a human-readable relative time string for past dates.
+         *
+         * Shows the largest non-zero unit: "just now", "5 minutes ago", "3 days ago".
+         * Returns empty string if the date is in the future or on invalid input.
+         * Complexity: O(1).
+         *
+         * @param string $date
+         * @param string $format
+         * @param array<string, string> $labels
+         * @return string
+         */
+        public static function ago(string $date, string $format = 'Y-m-d', array $labels = []): string
+        {
+            $parsed = date_create_from_format($format, $date, self::resolveTimezone(null));
+
+            if ($parsed === false) {
+                return '';
+            }
+
+            $now = new DateTime('now', self::resolveTimezone(null));
+
+            if ($parsed->getTimestamp() >= $now->getTimestamp()) {
+                return '';
+            }
+
+            $diff = self::diff($now->format('Y-m-d H:i:s'), $parsed->format('Y-m-d H:i:s'), 'Y-m-d H:i:s');
+
+            if ($diff === false) {
+                return '';
+            }
+
+            return self::formatRelative($diff['result'], $labels, 'ago');
+        }
+
+        /**
+         * Returns a human-readable relative time string for future dates.
+         *
+         * Shows the largest non-zero unit: "in a few seconds", "in 5 minutes", "in 3 days".
+         * Returns empty string if the date is in the past or on invalid input.
+         * Complexity: O(1).
+         *
+         * @param string $date
+         * @param string $format
+         * @param array<string, string> $labels
+         * @return string
+         */
+        public static function fromNow(string $date, string $format = 'Y-m-d', array $labels = []): string
+        {
+            $parsed = date_create_from_format($format, $date, self::resolveTimezone(null));
+
+            if ($parsed === false) {
+                return '';
+            }
+
+            $now = new DateTime('now', self::resolveTimezone(null));
+
+            if ($parsed->getTimestamp() <= $now->getTimestamp()) {
+                return '';
+            }
+
+            $diff = self::diff($parsed->format('Y-m-d H:i:s'), $now->format('Y-m-d H:i:s'), 'Y-m-d H:i:s');
+
+            if ($diff === false) {
+                return '';
+            }
+
+            return self::formatRelative($diff['result'], $labels, 'from_now');
+        }
+
 
 
         /**
@@ -256,52 +279,83 @@
         }
 
         /**
-         * Formats a DateInterval into a human-readable string.
+         * Formats a seconds count into a human-readable relative string.
          *
-         * @param DateInterval $interval
+         * Uses the largest non-zero unit. Returns "just now" for <60s.
+         * Complexity: O(1).
+         *
+         * @param int $seconds
+         * @param array<string, string> $labels
+         * @param string $suffix
          * @return string
          */
-        private static function formatInterval(DateInterval $interval): string
+        private static function formatRelative(int $seconds, array $labels, string $suffix): string
         {
-            $parts = self::intervalParts($interval);
+            if ($seconds < 60) {
+                return $suffix === 'from_now'
+                    ? ($labels['just_now'] ?? 'in a few seconds')
+                    : ($labels['just_now'] ?? 'just now');
+            }
 
-            return $parts === [] ? '0 seconds' : implode(', ', $parts);
+            if ($seconds < 3600) {
+                $value = (int) floor($seconds / 60);
+                $unit = $value > 1
+                    ? ($labels['minutes'] ?? 'minutes')
+                    : ($labels['minute'] ?? 'minute');
+
+                return self::formatUnit($value, $unit, $labels, $suffix);
+            }
+
+            if ($seconds < 86400) {
+                $value = (int) floor($seconds / 3600);
+                $unit = $value > 1
+                    ? ($labels['hours'] ?? 'hours')
+                    : ($labels['hour'] ?? 'hour');
+
+                return self::formatUnit($value, $unit, $labels, $suffix);
+            }
+
+            if ($seconds < 2592000) {
+                $value = (int) floor($seconds / 86400);
+                $unit = $value > 1
+                    ? ($labels['days'] ?? 'days')
+                    : ($labels['day'] ?? 'day');
+
+                return self::formatUnit($value, $unit, $labels, $suffix);
+            }
+
+            if ($seconds < 31536000) {
+                $value = (int) floor($seconds / 2592000);
+                $unit = $value > 1
+                    ? ($labels['months'] ?? 'months')
+                    : ($labels['month'] ?? 'month');
+
+                return self::formatUnit($value, $unit, $labels, $suffix);
+            }
+
+            $value = (int) floor($seconds / 31536000);
+            $unit = $value > 1
+                ? ($labels['years'] ?? 'years')
+                : ($labels['year'] ?? 'year');
+
+            return self::formatUnit($value, $unit, $labels, $suffix);
         }
 
         /**
-         * Extracts non-zero parts from a DateInterval.
-         *
-         * @param DateInterval $interval
-         * @return list<string>
+         * @param int $value
+         * @param string $unit
+         * @param array<string, string> $labels
+         * @param string $suffix
+         * @return string
          */
-        private static function intervalParts(DateInterval $interval): array
+        private static function formatUnit(int $value, string $unit, array $labels, string $suffix): string
         {
-            $parts = [];
+            $formatted = $value .' '. $unit;
 
-            if ($interval->y > 0) {
-                $parts[] = $interval->y . ' year' . ($interval->y > 1 ? 's' : '');
+            if ($suffix === 'from_now') {
+                return ($labels['from_now'] ?? 'in') .' '. $formatted;
             }
 
-            if ($interval->m > 0) {
-                $parts[] = $interval->m . ' month' . ($interval->m > 1 ? 's' : '');
-            }
-
-            if ($interval->d > 0) {
-                $parts[] = $interval->d . ' day' . ($interval->d > 1 ? 's' : '');
-            }
-
-            if ($interval->h > 0) {
-                $parts[] = $interval->h . ' hour' . ($interval->h > 1 ? 's' : '');
-            }
-
-            if ($interval->i > 0) {
-                $parts[] = $interval->i . ' minute' . ($interval->i > 1 ? 's' : '');
-            }
-
-            if ($interval->s > 0) {
-                $parts[] = $interval->s . ' second' . ($interval->s > 1 ? 's' : '');
-            }
-
-            return $parts;
+            return $formatted .' '. ($labels['ago'] ?? 'ago');
         }
     }

@@ -206,24 +206,58 @@ test('withTimezone reverts even if callback throws', function () {
 // diff()
 // ---------------------------------------------------------------
 
-test('diff returns 0 seconds for same date', function () {
-    expect(Date::diff('2024-12-31', '2024-12-31'))->toBe('0 seconds');
+test('diff returns zeros for same date', function () {
+    $result = Date::diff('2024-12-31', '2024-12-31');
+
+    expect($result['result'])->toBe(0);
+    expect($result['parts'])->toBe([
+        'years' => 0,
+        'months' => 0,
+        'days' => 0,
+        'hours' => 0,
+        'minutes' => 0,
+        'seconds' => 0,
+    ]);
 });
 
-test('diff returns days for different dates', function () {
+test('diff returns days correctly', function () {
     $result = Date::diff('2024-12-01', '2024-12-31');
 
-    expect($result)->toContain('days');
+    expect($result['result'])->toBe(30 * 86400);
+    expect($result['parts']['days'])->toBe(30);
 });
 
-test('diff returns empty string for invalid date', function () {
-    expect(Date::diff('invalid', '2024-12-31'))->toBe('');
+test('diff returns months and days', function () {
+    $result = Date::diff('2024-01-01', '2024-03-15');
+
+    expect($result['parts']['months'])->toBe(2);
+    expect($result['parts']['days'])->toBe(14);
+});
+
+test('diff returns false for invalid input', function () {
+    expect(Date::diff('invalid', '2024-12-31'))->toBeFalse();
 });
 
 test('diff works with reverse order', function () {
     $result = Date::diff('2024-12-31', '2024-12-01');
 
-    expect($result)->toContain('days');
+    expect($result['parts']['days'])->toBe(30);
+});
+
+test('diff returns years correctly', function () {
+    $result = Date::diff('2022-01-01', '2024-01-01');
+
+    expect($result['parts']['years'])->toBe(2);
+});
+
+test('diff with custom format', function () {
+    $result = Date::diff('31/12/2024', '01/12/2024', 'd/m/Y');
+
+    expect($result['parts']['days'])->toBe(30);
+});
+
+test('diff returns false when both inputs invalid', function () {
+    expect(Date::diff('invalid1', 'invalid2'))->toBeFalse();
 });
 
 // ---------------------------------------------------------------
@@ -231,35 +265,213 @@ test('diff works with reverse order', function () {
 // ---------------------------------------------------------------
 
 test('ago returns just now for recent time', function () {
-    $now = date('Y-m-d H:i:s');
+    $recent = date('Y-m-d H:i:s', time() - 5);
 
-    expect(Date::ago($now, 'Y-m-d H:i:s'))->toBe('just now');
+    expect(Date::ago($recent, 'Y-m-d H:i:s'))->toBe('just now');
 });
 
 test('ago returns minutes ago', function () {
-    $past = date('Y-m-d H:i:s', time() - 300); // 5 minutes ago
+    $past = date('Y-m-d H:i:s', time() - 300);
 
     expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('5 minutes ago');
 });
 
 test('ago returns hours ago', function () {
-    $past = date('Y-m-d H:i:s', time() - 7200); // 2 hours ago
+    $past = date('Y-m-d H:i:s', time() - 7200);
 
     expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('2 hours ago');
 });
 
 test('ago returns days ago', function () {
-    $past = date('Y-m-d', time() - 86400 * 3); // 3 days ago
+    $past = date('Y-m-d', time() - 86400 * 3);
 
     expect(Date::ago($past))->toBe('3 days ago');
 });
 
-test('ago returns from now for future date', function () {
-    $future = date('Y-m-d H:i:s', time() + 3600); // 1 hour from now
+test('ago returns empty for future date', function () {
+    $future = date('Y-m-d H:i:s', time() + 3600);
 
-    expect(Date::ago($future, 'Y-m-d H:i:s'))->toContain('from now');
+    expect(Date::ago($future, 'Y-m-d H:i:s'))->toBe('');
 });
 
-test('ago returns empty string for invalid date', function () {
+test('ago returns empty for invalid date', function () {
     expect(Date::ago('invalid'))->toBe('');
+});
+
+test('ago with custom labels', function () {
+    $past = date('Y-m-d H:i:s', time() - 7200);
+
+    $labels = [
+        'hours' => 'horas',
+        'ago' => 'atrás',
+    ];
+
+    expect(Date::ago($past, 'Y-m-d H:i:s', $labels))->toBe('2 horas atrás');
+});
+
+test('ago with full portuguese labels', function () {
+    $past = date('Y-m-d H:i:s', time() - 7200);
+
+    $labels = [
+        'just_now' => 'agora',
+        'minute' => 'minuto',
+        'minutes' => 'minutos',
+        'hour' => 'hora',
+        'hours' => 'horas',
+        'day' => 'dia',
+        'days' => 'dias',
+        'month' => 'mês',
+        'months' => 'meses',
+        'year' => 'ano',
+        'years' => 'anos',
+        'ago' => 'atrás',
+    ];
+
+    expect(Date::ago($past, 'Y-m-d H:i:s', $labels))->toBe('2 horas atrás');
+});
+
+test('ago singular in portuguese', function () {
+    $past = date('Y-m-d H:i:s', time() - 90);
+
+    $labels = [
+        'minute' => 'minuto',
+        'minutes' => 'minutos',
+        'ago' => 'atrás',
+    ];
+
+    expect(Date::ago($past, 'Y-m-d H:i:s', $labels))->toBe('1 minuto atrás');
+});
+
+test('ago just now in portuguese', function () {
+    $recent = date('Y-m-d H:i:s', time() - 5);
+
+    $labels = ['just_now' => 'agora'];
+
+    expect(Date::ago($recent, 'Y-m-d H:i:s', $labels))->toBe('agora');
+});
+
+test('ago returns singular minute', function () {
+    $past = date('Y-m-d H:i:s', time() - 90);
+
+    expect(Date::ago($past, 'Y-m-d H:i:s'))->toBe('1 minute ago');
+});
+
+test('ago returns months ago', function () {
+    $past = date('Y-m-d', strtotime('-60 days'));
+
+    expect(Date::ago($past))->toBe('2 months ago');
+});
+
+test('ago returns years ago', function () {
+    $past = date('Y-m-d', strtotime('-400 days'));
+
+    expect(Date::ago($past))->toBe('1 year ago');
+});
+
+// ---------------------------------------------------------------
+// fromNow()
+// ---------------------------------------------------------------
+
+test('fromNow returns in a few seconds for near future', function () {
+    $near = date('Y-m-d H:i:s', time() + 5);
+
+    expect(Date::fromNow($near, 'Y-m-d H:i:s'))->toBe('in a few seconds');
+});
+
+test('fromNow returns in minutes', function () {
+    $future = date('Y-m-d H:i:s', time() + 300);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in 5 minutes');
+});
+
+test('fromNow returns in hours', function () {
+    $future = date('Y-m-d H:i:s', time() + 7200);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in 2 hours');
+});
+
+test('fromNow returns in days', function () {
+    $future = date('Y-m-d', time() + 86400 * 3);
+
+    expect(Date::fromNow($future))->toBe('in 3 days');
+});
+
+test('fromNow returns empty for past date', function () {
+    $past = date('Y-m-d H:i:s', time() - 3600);
+
+    expect(Date::fromNow($past, 'Y-m-d H:i:s'))->toBe('');
+});
+
+test('fromNow returns empty for invalid date', function () {
+    expect(Date::fromNow('invalid'))->toBe('');
+});
+
+test('fromNow with custom labels', function () {
+    $future = date('Y-m-d H:i:s', time() + 7200);
+
+    $labels = [
+        'hours' => 'horas',
+        'from_now' => 'em',
+    ];
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s', $labels))->toBe('em 2 horas');
+});
+
+test('fromNow with full portuguese labels', function () {
+    $future = date('Y-m-d H:i:s', time() + 7200);
+
+    $labels = [
+        'just_now' => 'agora',
+        'minute' => 'minuto',
+        'minutes' => 'minutos',
+        'hour' => 'hora',
+        'hours' => 'horas',
+        'day' => 'dia',
+        'days' => 'dias',
+        'month' => 'mês',
+        'months' => 'meses',
+        'year' => 'ano',
+        'years' => 'anos',
+        'from_now' => 'em',
+    ];
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s', $labels))->toBe('em 2 horas');
+});
+
+test('fromNow singular in portuguese', function () {
+    $future = date('Y-m-d H:i:s', time() + 90);
+
+    $labels = [
+        'minute' => 'minuto',
+        'minutes' => 'minutos',
+        'from_now' => 'em',
+    ];
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s', $labels))->toBe('em 1 minuto');
+});
+
+test('fromNow in a few seconds in portuguese', function () {
+    $near = date('Y-m-d H:i:s', time() + 5);
+
+    $labels = ['just_now' => 'agora'];
+
+    expect(Date::fromNow($near, 'Y-m-d H:i:s', $labels))->toBe('agora');
+});
+
+test('fromNow returns in 1 minute', function () {
+    $future = date('Y-m-d H:i:s', time() + 90);
+
+    expect(Date::fromNow($future, 'Y-m-d H:i:s'))->toBe('in 1 minute');
+});
+
+test('fromNow returns in months', function () {
+    $future = date('Y-m-d', strtotime('+60 days'));
+
+    expect(Date::fromNow($future))->toBe('in 2 months');
+});
+
+test('fromNow returns in 1 year', function () {
+    $future = date('Y-m-d', strtotime('+400 days'));
+
+    expect(Date::fromNow($future))->toBe('in 1 year');
 });
