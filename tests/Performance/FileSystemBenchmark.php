@@ -129,3 +129,58 @@ test('bench rglob recursive', function () {
 
     expect($us)->toBeFloat();
 });
+
+// ---------------------------------------------------------------
+// unit()
+// ---------------------------------------------------------------
+
+test('bench unit small', function () {
+    $us = bench(fn() => FileSystem::unit(1024), 10_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench unit large', function () {
+    $us = bench(fn() => FileSystem::unit(1_073_741_824), 10_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// mkdir()
+// ---------------------------------------------------------------
+
+test('bench mkdir single', function () {
+    $us = bench(function () {
+        $tmp = sys_get_temp_dir() . '/fs_bench_mkdir_' . uniqid();
+        FileSystem::mkdir($tmp);
+        rmdir($tmp);
+    }, 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+test('bench mkdir nested', function () {
+    $us = bench(function () {
+        $tmp = sys_get_temp_dir() . '/fs_bench_mkdir_' . uniqid() . '/a/b/c';
+        FileSystem::mkdir($tmp);
+        FileSystem::rrmdir(sys_get_temp_dir() . '/fs_bench_mkdir_' . dirname(str_replace(sys_get_temp_dir() . '/', '', $tmp)));
+    }, 1_000);
+
+    expect($us)->toBeFloat();
+});
+
+// ---------------------------------------------------------------
+// mime()
+// ---------------------------------------------------------------
+
+test('bench mime detection', function () {
+    $tmp = sys_get_temp_dir() . '/fs_bench_mime_' . uniqid() . '.txt';
+    file_put_contents($tmp, 'hello world');
+
+    $us = bench(fn() => FileSystem::mime($tmp), 1_000);
+
+    unlink($tmp);
+
+    expect($us)->toBeFloat();
+});
