@@ -1,6 +1,6 @@
 {
     "name": "stougeiro/support",
-    "description": "A small helper library providing generic support utilities for PHP applications.",
+    "description": "Lightweight PHP 8.2+ utilities for arrays, strings, dates, passwords, files, base64, and TTL — zero dependencies, PHPStan Level 9.",
     "type": "library",
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -12,16 +12,21 @@
         }
     ],
     "keywords": [
-        "support",
-        "helpers",
         "utilities",
-        "functions",
-        "php-helpers",
-        "php-utilities",
-        "toolkit",
-        "assist",
-        "helper-functions",
-        "support-library"
+        "helpers",
+        "array",
+        "string",
+        "date",
+        "password",
+        "filesystem",
+        "base64",
+        "ttl",
+        "slugify",
+        "mask",
+        "fqcn",
+        "transliterate",
+        "zero-dependency",
+        "toolkit"
     ],
     "support": {
         "issues": "https://github.com/stougeiro/support/issues",
